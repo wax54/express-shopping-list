@@ -16,11 +16,11 @@ router.post('/', (req, res) => {
         throw new ExpressError("name and price required", 400);
     const item = new Item(name, price);
     items.push(item.serialize());
-    return res.json({added: item.serialize()});
+    return res.status(201).json({added: item.serialize()});
 });
 
 router.get('/:name', (req, res, next) => {
-    const item = items.find((item) => item.name === req.params.name );
+    const item = getItem(req.params.name);
     if (!item) 
         throw new ExpressError("Item Not Found", 404)
     else 
@@ -30,7 +30,7 @@ router.get('/:name', (req, res, next) => {
 router.patch('/:name', (req, res, next) => {
     const name = req.body.name;
     const price = req.body.price;
-    const item = items.find((item) => item.name === req.params.name);
+    const item = getItem(req.params.name);
     if (!item)
         throw new ExpressError("Item Not Found", 404)
     else{
@@ -40,13 +40,24 @@ router.patch('/:name', (req, res, next) => {
         if(price){
             item.price = price;
         }
-        return res.json(item);
+        return res.json({updated: item});
     }
 
 });
-router.delete('/:name', (req, res, next) => {
 
+router.delete('/:name', (req, res, next) => {
+    const itemIndex = items.findIndex((item) => item.name === req.params.name);
+    if (itemIndex == -1)
+        throw new ExpressError("Item Not Found", 404)
+    else {
+        items.splice(itemIndex, 1);
+        return res.json({ message: "Deleted" });
+    }
 });
 
+
+function getItem(name){
+    return items.find((item) => item.name === name);
+}
 
 module.exports = router;

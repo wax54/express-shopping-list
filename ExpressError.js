@@ -10,13 +10,17 @@
 //app.use(ExpressErrorHandler);
 
 function pageNotFound(req, res, next) {
-    return res.status(404).json({msg:'Not Found', status:404});
+    return res.status(404).json({msg:'Page Not Found', status:404});
 }
 
 function expressErrorHandler(err, req, res, next){
     const status = err.status || 500;
     const msg = err.msg;
-    console.error(err.stack);
+    if(process.env.NODE_ENV !== 'testing')
+        console.error(err.stack);
+    else 
+        if(status == 500) 
+            console.log(err.stack);
     return res.status(status).json({msg, status});
 }
 
